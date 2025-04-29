@@ -1,128 +1,127 @@
-# Jogo de Setas
+# 📏 Ohmímetro com Raspberry Pi Pico
 
-Este projeto implementa um jogo interativo de memória e reflexos em um microcontrolador **Raspberry Pi Pico**, utilizando:
+Este projeto implementa um **ohmímetro** em um microcontrolador **Raspberry Pi Pico**, utilizando:
 
-- Matriz de LEDs **WS2812B 5x5**
-- Display OLED **SSD1306**
-- **Joystick analógico**
-- **Buzzers**
-- **LED RGB**
+- **Display OLED SSD1306** para exibir o valor da resistência e as cores das faixas.
+- **Matriz de LEDs WS2812B 5x5**, inicializada e limpa ao ligar.
+- **Conversor ADC** para medir a tensão em um circuito divisor de tensão.
 
-O jogador deve memorizar e reproduzir sequências aleatórias de setas (cima, baixo, esquerda, direita) exibidas na matriz, com dificuldade crescente conforme as rodadas avançam.
+O sistema mede resistências na faixa de **510 Ω a 100 kΩ**, calcula o valor mais próximo da série **E24**, determina as cores das faixas (primeira, segunda e multiplicador) e exibe as informações no display.  
+Ideal para aprendizado em **sistemas embarcados**, **eletrônica** e **desenvolvimento com o Pico SDK**.
 
-O objetivo é criar uma experiência divertida e desafiadora, com feedback visual e sonoro — ideal para aprendizado em **sistemas embarcados** e **desenvolvimento de jogos**.
+---
 
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
-arrow_game/
-├── Arrow_Game.c          # Código principal do projeto
-├── CMakeLists.txt        # Arquivo de configuração para compilação com Pico SDK
-├── inc/                  # Arquivos auxiliares (bibliotecas para display, fontes, frames)
-└── pio_matrix.pio        # Código PIO para controle da matriz de LEDs WS2812B
+Ohmimetro/
+├── ohmimetro.c         # Código principal do projeto
+├── CMakeLists.txt      # Configuração de build com Pico SDK
+├── lib/                # Bibliotecas auxiliares (display, fontes, etc.)
+└── lib/pio_matrix.pio  # Código PIO para controle da matriz de LEDs
 ```
 
-## Especificações do Projeto
+---
+
+## 📋 Especificações do Projeto
 
 ### Periféricos Utilizados
-- **Matriz de LEDs WS2812B 5x5**: Exibe setas e reações (sucesso, erro, game over).
-- **Display OLED SSD1306 128x64**: Mostra nível, rodada, posição do joystick e tela de game over.
-- **Joystick Analógico**: Controla a entrada do jogador (eixos X/Y) com botão integrado.
-- **Botão de Confirmação**: Valida as entradas durante a fase de resposta.
-- **2 Buzzers Passivos**: Emitirão sons ao início da fase de entrada.
-- **LED RGB**: Indica número de vidas (verde: 3, amarelo: 2, vermelho: 1).
+- **Display OLED SSD1306 128x64**: Exibe resistência, cores das faixas e mensagens de erro.
+- **Matriz de LEDs WS2812B 5x5**: Inicializada e apagada ao ligar.
+- **Resistor Conhecido (10 kΩ)**: Parte do divisor de tensão.
+- **ADC (GP28)**: Lê a tensão para calcular a resistência, com média de 100 leituras.
 
 ### Recursos do MCU (RP2040)
-- **PIO (Programmable I/O)**: Comunicação com a matriz de LEDs WS2812B.
-- **I2C**: Comunicação com o display OLED SSD1306.
-- **ADC (Analog-to-Digital Converter)**: Leitura dos eixos do joystick analógico.
-- **PWM**: Controle dos buzzers e do LED RGB.
-- **GPIO**: Gerenciamento de botões e sinais digitais.
+- **PIO**: Controle da matriz de LEDs WS2812B.
+- **I2C**: Comunicação com o display OLED.
+- **ADC**: Conversão analógico-digital da tensão lida.
+- **GPIO**: Gerenciamento dos pinos para I2C e ADC.
 
-## Materiais Necessários
+---
 
+## 🔌 Materiais Necessários
 - Raspberry Pi Pico ou Pico W
 - Cabo micro-USB para USB-A
 - Protoboard e fios jumper
-- Computador para compilação e upload do código
+- Resistor conhecido de 10 kΩ
+- Display OLED SSD1306 (I2C)
+- Matriz de LEDs WS2812B 5x5
+- Resistores para teste (510 Ω a 100 kΩ)
 
-## Softwares Utilizados
+---
 
-- **Visual Studio Code** (recomendado)
-- **Pico SDK** (biblioteca oficial para RP2040)
-- **ARM GCC** (compilador C)
-- **CMake** (gerenciamento de build)
+## 🛠️ Softwares Utilizados
+- Visual Studio Code (recomendado)
+- Pico SDK
+- ARM GCC (compilador C)
+- CMake
+- Minicom ou similar (opcional, para monitoramento via serial)
 
-## Como Utilizar
+---
 
-### Configurar o Hardware
+## ⚙️ Como Utilizar
 
-| Componente        | Pino no Pico   |
-|-------------------|----------------|
-| Matriz WS2812B     | GP7             |
-| Display OLED (SDA) | GP14            |
-| Display OLED (SCL) | GP15            |
-| Joystick (X)       | GP27 (ADC1)     |
-| Joystick (Y)       | GP26 (ADC0)     |
-| Botão do Joystick  | GP6             |
-| Buzzer 1           | GP21            |
-| Buzzer 2           | GP10            |
-| LED RGB (Vermelho) | GP13            |
-| LED RGB (Verde)    | GP11            |
-| LED RGB (Azul)     | GP12            |
+### 1. Configurar o Hardware
 
-### Compilar e Carregar o Código
+| Componente         | Pino no Pico |
+|---------------------|--------------|
+| Matriz WS2812B       | GP7          |
+| Display OLED (SDA)   | GP14         |
+| Display OLED (SCL)   | GP15         |
+| ADC (Resistor)       | GP28 (ADC2)  |
 
-```bash
-git clone <URL_DO_REPOSITORIO>
-cd arrow_game
-mkdir build
-cd build
-cmake ..
-make
-```
+**Circuito Divisor de Tensão:**
+- Conecte um resistor conhecido de 10 kΩ entre 3.3V e o pino GP28.
+- Conecte o resistor desconhecido entre GP28 e GND.
+- Utilize uma protoboard para organizar as conexões.
 
-- Copie o arquivo `.uf2` gerado para o Pico via modo **bootloader**.
+---
 
-## Como Jogar
+### 2. Operação
 
-### Fase Inicial
 - Conecte o Pico ao computador via USB.
-- Pressione o botão do joystick para iniciar o jogo.
+- Insira um resistor no circuito divisor de tensão.
+- O display OLED mostrará:
+  - Nomes das cores das faixas (e.g., "1: Amarelo", "2: Violeta", "Multi.: Vermelho").
+  - Valor da resistência calculada.
+  - Mensagem "**Fora de faixa**" se o resistor estiver fora do intervalo suportado.
 
-### Fase de Exibição
-- A matriz de LEDs mostrará uma sequência de setas (cima, baixo, esquerda, direita).
-- Cada seta é exibida por **1000 a 2000 ms**, com pausas de **200 ms**.
+A matriz de LEDs é inicializada mas permanece apagada.
 
-### Fase de Entrada
-- Movimente o joystick para escolher a direção correta.
-- Pressione o botão para confirmar.
-- Você terá **6 a 10 segundos** para repetir toda a sequência.
 
-### Feedback Visual e Sonoro
-- **Acerto**: Ícone verde por **2–3.5 segundos**.
-- **Erro/Timeout**: Ícone vermelho + perda de uma vida.
-- **Game Over**: Mensagem no display OLED + matriz vermelha por **4 segundos**.
+---
 
-### Indicadores
+## 🔎 Indicadores
 
-| Indicador            | Função                             |
-|----------------------|------------------------------------|
-| Matriz de LEDs        | Exibe setas e reações              |
-| Display OLED          | Mostra nível, rodada e status      |
-| LED RGB               | Indica vidas (verde, amarelo, vermelho) |
-| Buzzers               | Sinalizam início da fase de entrada |
+| Indicador         | Função                                    |
+|-------------------|-------------------------------------------|
+| Display OLED      | Exibe cores, resistência e mensagens de erro |
+| Matriz de LEDs    | Inicializada e apagada ao ligar           |
+| Saída Serial      | Debug com resistência e cores             |
 
-## Vídeo Demonstrativo
+---
 
-[Assista ao vídeo demonstrativo](https://drive.google.com/file/d/12Lp5miLpn3lDZJ-NJguo7utmLh1KyGb-/view?usp=sharing)
+## ⚠️ Limitações
 
-## Autor
+- **Precisão reduzida em resistências altas**: acima de 47 kΩ, a precisão da leitura diminui devido à aproximação da tensão de 3.3V.
+- **Faixa limitada**: medição entre **510 Ω a 100 kΩ** apenas.
+- **Matriz de LEDs**: atualmente não exibe cores nem padrões.
 
-Desenvolvido por **Elmer Carvalho**  
-[GitHub - Perfil](https://github.com/Elmer-Carvalho)
+---
 
-## Licença
+## 🚀 Melhorias Futuras
+- Implementar exibição das cores nas faixas da matriz de LEDs.
+- Representar graficamente o resistor no display OLED.
+- Melhorar a precisão em resistências altas (utilizar resistor conhecido maior ou circuito de seleção).
+- Adicionar botão para recalibrar ou reiniciar a medição.
 
-Este projeto está licenciado sob a licença MIT.  
+---
+
+## 👤 Autor
+**Desenvolvido por [Elmer Carvalho](https://github.com/Elmer-Carvalho)**
+
+---
+
+## 📝 Licença
+Este projeto está licenciado sob a licença **MIT**.  
 Consulte o arquivo [LICENSE](LICENSE) para mais informações.
